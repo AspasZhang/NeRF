@@ -54,10 +54,16 @@ echo [*] Installation options: Auto add to PATH + pip + Available for all users
 echo.
 
 :: Silent installation, auto add PATH
-"%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+echo [*] Installing Python (this may take 2-5 minutes)...
+start /wait "" "%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 
-:: Wait for installation to complete
-timeout /t 10 /nobreak >nul
+:: Wait for system to update with progress bar
+echo [*] Waiting for system to update...
+for /L %%i in (1,1,5) do (
+    <nul set /p="."
+    timeout /t 1 /nobreak >nul
+)
+echo.
 
 :: Clean up installer
 del "%INSTALLER%"
