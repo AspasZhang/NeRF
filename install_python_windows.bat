@@ -55,7 +55,15 @@ echo.
 
 :: Silent installation, auto add PATH
 echo [*] Installing Python (this may take 2-5 minutes)...
-start /wait "" "%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+echo [*] Please wait, installation in progress...
+start /wait "" "%INSTALLER%" /passive InstallAllUsers=1 PrependPath=1 Include_test=0
+if %errorlevel% neq 0 (
+    echo [!] Installation failed with error code %errorlevel%
+    echo [!] Please check if the installer file is valid
+    pause
+    goto end
+)
+echo [+] Installation completed successfully
 
 :: Wait for system to update with progress bar
 echo [*] Waiting for system to update...
