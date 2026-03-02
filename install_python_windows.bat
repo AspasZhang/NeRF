@@ -1,103 +1,103 @@
 ﻿@echo off
 setlocal enabledelayedexpansion
 chcp 936 >nul
-title Python 一键安装工具
+title Python One-Click Installer
 color 0A
 
 echo.
 echo ========================================
-echo    Python 一键安装工具 (Windows)
+echo    Python One-Click Installer (Windows)
 echo ========================================
 echo.
-echo 正在检测系统环境...
+echo Detecting system environment...
 echo.
 
-:: 检查是否已安装Python
+:: Check if Python is already installed
 python --version >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [OK] 检测到已安装Python:
+    echo [OK] Python detected:
     python --version
     echo.
-    choice /C YN /M "是否继续安装最新版本"
+    choice /C YN /M "Continue to install the latest version"
     if errorlevel 2 goto :end
 )
 
-:: 设置Python版本
+:: Set Python version
 set PYTHON_VERSION=3.12.2
 set DOWNLOAD_URL=https://npmmirror.com/mirrors/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
 
-echo [*] 准备下载 Python %PYTHON_VERSION%
-echo [*] 使用国内镜像源，速度更快
+echo [*] Preparing to download Python %PYTHON_VERSION%
+echo [*] Using domestic mirror for faster speed
 echo.
 
-:: 下载安装器
+:: Download installer
 set INSTALLER=%TEMP%\python_installer.exe
-echo [*] 正在下载安装器...
+echo [*] Downloading installer...
 powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%INSTALLER%' -UseBasicParsing}"
 
 if not exist "%INSTALLER%" (
-    echo [×] 下载失败，尝试备用源...
+    echo [×] Download failed, trying backup source...
     set DOWNLOAD_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
     powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%INSTALLER%' -UseBasicParsing}"
 )
 
 if not exist "%INSTALLER%" (
-    echo [×] 下载失败，请检查网络连接
+    echo [×] Download failed, please check network connection
     pause
     goto :end
 )
 
-echo [OK] 下载完成
+echo [OK] Download completed
 echo.
-echo [*] 开始安装 Python...
-echo [*] 安装选项: 自动添加到PATH + pip + 所有用户可用
+echo [*] Starting Python installation...
+echo [*] Installation options: Auto add to PATH + pip + Available for all users
 echo.
 
-:: 静默安装，自动添加PATH
+:: Silent installation, auto add PATH
 "%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 
-:: 等待安装完成
+:: Wait for installation to complete
 timeout /t 10 /nobreak >nul
 
-:: 清理安装器
+:: Clean up installer
 del "%INSTALLER%"
 
 echo.
-echo [*] 验证安装...
+echo [*] Verifying installation...
 echo.
 
-:: 刷新环境变量
+:: Refresh environment variables
 call refreshenv >nul 2>&1
-:: 如果 refreshenv 失败，手动设置当前会话的 PATH
+:: If refreshenv fails, manually set PATH for current session
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [*] refreshenv 不可用，尝试手动设置 PATH...
+    echo [*] refreshenv not available, trying to set PATH manually...
     setx PATH "%PATH%;C:\Program Files\Python312;C:\Program Files\Python312\Scripts" >nul 2>&1
     set PATH=%PATH%;C:\Program Files\Python312;C:\Program Files\Python312\Scripts
 )
 
-:: 验证Python
+:: Verify Python
 python --version >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [OK] Python 安装成功！
+    echo [OK] Python installed successfully!
     python --version
     echo.
-    echo [OK] pip 版本:
+    echo [OK] pip version:
     pip --version
     echo.
-    echo [*] 正在安装常用库 requests...
+    echo [*] Installing common library requests...
     pip install requests -i https://pypi.tuna.tsinghua.edu.cn/simple
-    echo [OK] requests 安装完成
+    echo [OK] requests installed
     echo.
     echo ========================================
-    echo    安装完成！
+    echo    Installation Complete!
     echo ========================================
     echo.
-    echo 你现在可以在命令行中使用 python 和 pip 命令了
+    echo You can now use python and pip commands in the command line
     echo.
 ) else (
-    echo [!] 安装完成，但需要重启命令行窗口才能使用
-    echo [!] 或者注销后重新登录
+    echo [!] Installation complete, but you need to restart the command line window to use it
+    echo [!] Or log out and log back in
 )
 
 :end
